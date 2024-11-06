@@ -25,28 +25,26 @@
             <h2 class="text-2xl font-bold tracking-tight text-gray-900">Customers also purchased</h2>
 
             <div class="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
-                <div v-for="product in products" :key="product.id" class="group relative">
-                    <div v-if="product.stock > 0">
-                        <div
-                            class="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-80">
-                            <img :src="product.imageSrc"
-                                class="h-full w-full object-cover object-center lg:h-full lg:w-full" />
+                <div v-for="product in availableProducts" :key="product.id" class="group relative">
+                    <div
+                        class="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-80">
+                        <img :src="product.imageSrc"
+                            class="h-full w-full object-cover object-center lg:h-full lg:w-full" />
+                    </div>
+                    <div class="mt-4 flex justify-between">
+                        <div>
+                            <h3 class="text-sm text-gray-700">
+                                <!--<a :href="product.href">
+                                    <span aria-hidden="true" class="absolute inset-0" />
+                                    {{ product.title }}
+                                </a>-->
+                                <a>
+                                    <router-link :to="`/produit/${product.id}`">{{ product.title }}</router-link>
+                                </a>
+                            </h3>
+                            <p class="mt-1 text-sm text-gray-500">{{ product.category }}</p>
                         </div>
-                        <div class="mt-4 flex justify-between">
-                            <div>
-                                <h3 class="text-sm text-gray-700">
-                                    <!--<a :href="product.href">
-                                        <span aria-hidden="true" class="absolute inset-0" />
-                                        {{ product.title }}
-                                    </a>-->
-                                    <a>
-                                        <router-link :to="`/produit/${product.id}`">{{ product.title }}</router-link>
-                                    </a>
-                                </h3>
-                                <p class="mt-1 text-sm text-gray-500">{{ product.category }}</p>
-                            </div>
-                            <p class="text-sm font-medium text-gray-900">{{ product.price }}</p>
-                        </div>
+                        <p class="text-sm font-medium text-gray-900">{{ product.price }}</p>
                     </div>
                 </div>
             </div>
@@ -55,21 +53,24 @@
 </template>
 
 <script setup>
-import {/*defineProps, */defineEmits } from 'vue'; //defineProps est importé automatiquement depuis peu
+import {/*defineProps, */computed, onMounted, defineEmits } from 'vue'; //defineProps est importé automatiquement depuis peu
 
-//Avec provide/inject
 import { useProducts } from '@/composables/useProducts';
-const { products } = useProducts();
+const { loading, error, fetchProducts, availableProducts } = useProducts();
 
 
-//Sans provide/inject
-defineProps(['message'/*, 'products'*/])
+defineProps(['message'])
 
 const emit = defineEmits(['childEvent']);
 
 const sendMessageToParent = () => {
     emit('childEvent', 'Bonjour du composant enfant!')
 };
+
+// Chargement des produits au montage du composant
+onMounted(() => {
+    fetchProducts(true); // false pour utiliser l'API réelle, true pour les données mockées
+});
 
 //en V2 :
 /*export default {

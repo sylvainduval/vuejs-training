@@ -1,71 +1,70 @@
-import { ref, provide, inject } from 'vue';
+import { ref, provide, inject, computed } from 'vue';
+import { productsDB } from '@/db/productsDB.js'
+import { apiService } from '@/services/apiService';
 
 const ProductsSymbol = Symbol();
 
 export function provideProducts() {
-    const products = ref([
-        {
-          "id": 1,
-          "title": "iPhone 9",
-          "description": "An apple mobile which is nothing like apple",
-          "price": 549,
-          "discountPercentage": 12.96,
-          "rating": 4.69,
-          "stock": 94,
-          "brand": "Apple",
-          "category": "smartphones",
-          "imageSrc": "https://tailwindui.com/plus/img/ecommerce-images/category-page-04-image-card-01.jpg",
-          "images": ["https://via.placeholder.com/600x600", "https://via.placeholder.com/600x600", "https://via.placeholder.com/600x600"],
-          "href": "#",
-        },
-        {
-            "id": 2,
-            "title": "iPhone 10",
-            "description": "An super apple mobile which is nothing like apple",
-            "price": 649,
-            "discountPercentage": 13.96,
-            "rating": 4.79,
-            "stock": 34,
-            "brand": "Apple",
-            "category": "smartphones",
-            "imageSrc": "https://tailwindui.com/plus/img/ecommerce-images/category-page-04-image-card-07.jpg",
-            "images": ["https://via.placeholder.com/600x600", "https://via.placeholder.com/600x600", "https://via.placeholder.com/600x600"],
-            "href": "#",
-        },
-        {
-            "id": 3,
-            "title": "iPhone 11",
-            "description": "An super apple mobile which is nothing like apple",
-            "price": 749,
-            "discountPercentage": 3.96,
-            "rating": 4.89,
-            "stock": 0,
-            "brand": "Apple",
-            "category": "smartphones",
-            "imageSrc": "https://tailwindui.com/plus/img/ecommerce-images/category-page-04-image-card-05.jpg",
-            "images": ["https://via.placeholder.com/600x600", "https://via.placeholder.com/600x600", "https://via.placeholder.com/600x600"],
-            "href": "#",
+    const products = ref([]);
+    const loading = ref(false);
+    const error = ref(null);
+
+    const fetchProducts = async (useMockData = true) => {
+        loading.value = true;
+        error.value = null;
+        try {
+          if (useMockData) {
+            products.value = productsDB.products;
+          } else {
+            const fetchedProducts = await apiService.fetchProducts();
+            products.value = fetchedProducts.products;
+          }
+        } catch (err) {
+          console.error("Erreur lors de la récupération des produits :", err);
+          error.value = "Erreur lors du chargement des produits.";
+        } finally {
+          loading.value = false;
         }
-    ]);
+      };
+
 
     // Ces fonctions modifient l'état réactif
-    function addProduct(product) {
-        products.value = [...products, product];
+    //function addProduct(product) {
+    const addProduct = (product) => {
+        console.log(product);
+        products.value.push(product);
     }
+
+    const availableProducts = computed(() => {
+        return products.value.filter(product => product.stock > 0);
+      });
 
     // provide() rend ces valeurs et fonctions disponibles pour tous les composants enfants
     provide(ProductsSymbol, {
         products,
+        loading,
+        error,
+        fetchProducts,
         addProduct,
+        availableProducts
     });
  
     // On retourne aussi ces valeurs au cas où on voudrait les utiliser dans le composant actuel
     return {
         products,
-        addProduct
+        loading,
+        error,
+        fetchProducts,
+        addProduct,
+        availableProducts
     };
 }
 
 export function useProducts() {
-    return inject(ProductsSymbol);
+    //return inject(ProductsSymbol);
+    const products = inject(ProductsSymbol);
+    if (!products) {
+        throw new Error('Products not provided. Did you forget to call provideProducts?');
+    }
+    return products;
 }

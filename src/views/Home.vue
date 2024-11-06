@@ -2,7 +2,7 @@
     <div class="flex flex-col min-h-screen">
       <Navbar :links="headerNavLinks" />
       <Hero />
-      <ProductList :message="parentMessage" :products="productsList" @childEvent="handleChildEvent" />
+      <ProductList :message="parentMessage" @childEvent="handleChildEvent" />
       <Footer />
       <p>Message du composant enfant : {{ childMessage }}</p>
     </div>
@@ -15,7 +15,7 @@
   import Footer from '@/components/Footer.vue'
 
   import { mainDB } from '@/db/mainDB.js'
-  import { productsDB } from '@/db/productsDB.js'
+  //import { productsDB } from '@/db/productsDB.js'
 
   export default {
     components: {
@@ -26,7 +26,6 @@
             parentMessage: "Message du parent",
             childMessage: "",
             headerNavLinks: mainDB.headerNavLinks,
-            productsList: productsDB.products,
         };
     },
     methods: {

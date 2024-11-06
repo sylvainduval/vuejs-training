@@ -25,23 +25,38 @@
     import { reactive, ref } from 'vue'
     import Navbar from '@/components/Navbar.vue'
     import { mainDB } from '@/db/mainDB.js'
+    import { useProducts } from '@/composables/useProducts';
 
     const formData = reactive({
+        id: Math.floor(Math.random() * 1000),
         title: '',
         description: '',
         price: '',
+        discountPercentage: 0,
+        rating: 5,
+        stock: 100,
+        brand: 'Cochonou',
+        category: 'foods',
+        imageSrc: 'https://th.bing.com/th?id=OIP.qLqhZiP0aojakboSFbB7CQHaHa&w=250&h=250&c=8&rs=1&qlt=90&o=6&pid=3.1&rm=2',
+        images: [],
+        href: '#',
     });
 
     const errorsList = ref({});
 
     const headerNavLinks = reactive(mainDB.headerNavLinks);
 
+    // Utilisation du composable useAuth
+    const { addProduct } = useProducts();
+
     const handleSubmit = () => {
         if (validateForm()) {
             console.log('Envoi des données du form', formData);
+
+            addProduct(formData);
             setTimeout(() => {
                 alert('Produit ajouté avec succès');
-                Object.assign(formData, {title: '', description: '', price: ''});
+                //Object.assign(formData, {title: '', description: '', price: ''});
                 errorsList.value = {};
             }, 1000);
         }
